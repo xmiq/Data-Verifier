@@ -1,0 +1,49 @@
+﻿<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        x:Class="DataVerifier.MainWindow"
+        Title="Data Verifier">
+  <Grid>
+    <Grid.ColumnDefinitions>
+      <ColumnDefinition Width="24" />
+      <ColumnDefinition Width="*" />
+      <ColumnDefinition Width="24" />
+      <ColumnDefinition Width="*" />
+      <ColumnDefinition Width="24" />
+      <ColumnDefinition Width="*" />
+      <ColumnDefinition Width="24" />
+    </Grid.ColumnDefinitions>
+    <Grid.RowDefinitions>
+      <RowDefinition Height="24" />
+      <RowDefinition Height="25" />
+      <RowDefinition Height="24" />
+      <RowDefinition Height="40" />
+      <RowDefinition Height="24" />
+      <RowDefinition Height="*" />
+      <RowDefinition Height="24" />
+      <RowDefinition Height="40" />
+      <RowDefinition Height="24" />
+    </Grid.RowDefinitions>
+
+    <TextBlock Grid.Row="1" Grid.Column="1">PEM 20</TextBlock>
+    <TextBlock Grid.Row="1" Grid.Column="3">PEM 21</TextBlock>
+    <TextBlock Grid.Row="1" Grid.Column="5">PEM 22</TextBlock>
+
+    <TextBlock Grid.Row="3" Grid.Column="1" Name="PEM20_Path" Margin="0 0 100 0" TextWrapping="Wrap"></TextBlock>
+    <TextBlock Grid.Row="3" Grid.Column="3" Name="PEM21_Path" Margin="0 0 100 0" TextWrapping="Wrap"></TextBlock>
+    <TextBlock Grid.Row="3" Grid.Column="5" Name="PEM22_Path" Margin="0 0 100 0" TextWrapping="Wrap"></TextBlock>
+
+    <Button Grid.Row="3" Grid.Column="1" HorizontalAlignment="Right" Width="80" Name="PEM20_Button">Browse</Button>
+    <Button Grid.Row="3" Grid.Column="3" HorizontalAlignment="Right" Width="80" Name="PEM21_Button">Browse</Button>
+    <Button Grid.Row="3" Grid.Column="5" HorizontalAlignment="Right" Width="80" Name="PEM22_Button">Browse</Button>
+
+    <ListBox Grid.Row="5" Grid.Column="1" Name="PEM20_ListBox"></ListBox>
+    <ListBox Grid.Row="5" Grid.Column="3" Name="PEM21_ListBox"></ListBox>
+    <ListBox Grid.Row="5" Grid.Column="5" Name="PEM22_ListBox"></ListBox>
+
+    <Button Grid.Row="7" Grid.Column="5" HorizontalAlignment="Right" Width="80" Name="Analyse">Analyse</Button>
+    <Button Grid.Row="7" Grid.Column="5" HorizontalAlignment="Right" Margin="0 0 104 0" Width="80" Name="LoadAll">LoadAll</Button>
+  </Grid>
+</Window>
