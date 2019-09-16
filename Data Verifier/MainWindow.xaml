@@ -23,6 +23,8 @@
       <RowDefinition Height="24" />
       <RowDefinition Height="*" />
       <RowDefinition Height="24" />
+      <RowDefinition Height="25" />
+      <RowDefinition Height="24" />
       <RowDefinition Height="40" />
       <RowDefinition Height="24" />
     </Grid.RowDefinitions>
@@ -43,7 +45,11 @@
     <ListBox Grid.Row="5" Grid.Column="3" Name="PEM21_ListBox"></ListBox>
     <ListBox Grid.Row="5" Grid.Column="5" Name="PEM22_ListBox"></ListBox>
 
-    <Button Grid.Row="7" Grid.Column="5" HorizontalAlignment="Right" Width="80" Name="Analyse">Analyse</Button>
-    <Button Grid.Row="7" Grid.Column="5" HorizontalAlignment="Right" Margin="0 0 104 0" Width="80" Name="LoadAll">LoadAll</Button>
+    <TextBlock Grid.Row="7" Grid.Column="1">Save Timestamp</TextBlock>
+
+    <DatePicker Grid.Row="9" Grid.Column="1" IsTodayHighlighted="True" Name="TimestampPicker" CustomDateFormatString="dd/MM/yyyy hh:mm:ss" SelectedDateFormat="Custom"></DatePicker>
+    <Button Grid.Row="9" Grid.Column="3" Width="80" HorizontalAlignment="Left" Name="UploadDatabases">Upload</Button>
+    <Button Grid.Row="9" Grid.Column="5" HorizontalAlignment="Right" Width="80" Name="Analyse">Analyse</Button>
+    <Button Grid.Row="9" Grid.Column="5" HorizontalAlignment="Right" Margin="0 0 104 0" Width="80" Name="LoadAll">LoadAll</Button>
   </Grid>
 </Window>

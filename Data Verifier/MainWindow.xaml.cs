@@ -1,11 +1,14 @@
 ﻿using Avalonia;
+using Avalonia.Animation;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
 using MoreLinq.Extensions;
+using Renci.SshNet;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Data;
 using System.Data.SQLite;
 using System.IO;
@@ -42,6 +45,9 @@ namespace DataVerifier
         ListBox PEM21_ListBox;
         ListBox PEM22_ListBox;
 
+        DatePicker TimestampPicker;
+
+        Button UploadDatabases;
         Button LoadAll;
         Button Analyse;
 
@@ -66,6 +72,8 @@ namespace DataVerifier
             PEM20_ListBox = this.FindControl<ListBox>("PEM20_ListBox");
             PEM21_ListBox = this.FindControl<ListBox>("PEM21_ListBox");
             PEM22_ListBox = this.FindControl<ListBox>("PEM22_ListBox");
+            TimestampPicker = this.FindControl<DatePicker>("TimestampPicker");
+            UploadDatabases = this.FindControl<Button>("UploadDatabases");
             LoadAll = this.FindControl<Button>("LoadAll");
             Analyse = this.FindControl<Button>("Analyse");
             #endregion
@@ -105,6 +113,39 @@ namespace DataVerifier
                     PEM22_Path.Text = string.Join("; ", files);
                 }
             };
+            UploadDatabases.Click += async (sender, e) =>
+            {
+                await Task.Run(() =>
+                {
+                    string pickerTime = (TimestampPicker.SelectedDate ?? DateTime.Now).ToString("ddMMyyyhhmmss");
+                    using (SshClient ssh = new SshClient(ConfigurationManager.AppSettings["Host"], ConfigurationManager.AppSettings["Username"], ConfigurationManager.AppSettings["Password"]))
+                    {
+                        ssh.Connect();
+                        ssh.RunCommand($"mkdir { pickerTime }");
+                        ssh.RunCommand($"mkdir { pickerTime }/PEM\\ 20");
+                        ssh.RunCommand($"mkdir { pickerTime }/PEM\\ 21");
+                        ssh.RunCommand($"mkdir { pickerTime }/PEM\\ 22");
+                        ssh.Disconnect();
+                    }
+
+                    using (ScpClient scp = new ScpClient(ConfigurationManager.AppSettings["Host"], ConfigurationManager.AppSettings["Username"], ConfigurationManager.AppSettings["Password"]))
+                    {
+                        scp.Connect();
+                        void UploadFile(TextBlock databasePath, string remotePath)
+                        {
+                            foreach (FileStream file in databasePath.Text.Split(separator: ";".ToCharArray(), options: StringSplitOptions.RemoveEmptyEntries).Select(x => x.Trim()).Where(x => File.Exists(x)).Select(x => File.OpenRead(x)))
+                            {
+                                scp.Upload(file, $"{ pickerTime }/{ remotePath }");
+                                file.Close();
+                            }
+                        }
+                        UploadFile(PEM20_Path, "PEM\\ 20");
+                        UploadFile(PEM21_Path, "PEM\\ 21");
+                        UploadFile(PEM22_Path, "PEM\\ 22");
+                        scp.Disconnect();
+                    }
+                });
+            };
             LoadAll.Click += async (sender, e) =>
             {
                 OpenFolderDialog openFolderDialog = new OpenFolderDialog
@@ -143,7 +184,7 @@ namespace DataVerifier
 
                 void LoadDatabase(TextBlock path, ListBox list)
                 {
-                    var databases = path.Text.Split(separator: ";".ToCharArray(), options: StringSplitOptions.RemoveEmptyEntries).Select(x => x.Trim()).Where(x => File.Exists(x));
+                    IEnumerable<string> databases = path.Text.Split(separator: ";".ToCharArray(), options: StringSplitOptions.RemoveEmptyEntries).Select(x => x.Trim()).Where(x => File.Exists(x));
                     foreach (string pathT in databases)
                     {
                         SQLiteConnection connection = new SQLiteConnection($"Data Source={ pathT }");
