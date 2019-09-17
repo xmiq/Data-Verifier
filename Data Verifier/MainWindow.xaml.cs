@@ -5,6 +5,7 @@ using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
 using MoreLinq.Extensions;
 using Renci.SshNet;
+using Renci.SshNet.Async;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -14,6 +15,7 @@ using System.Data.SQLite;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Linq;
@@ -47,6 +49,8 @@ namespace DataVerifier
 
         DatePicker TimestampPicker;
 
+        TextBlock UploadNotification;
+
         Button UploadDatabases;
         Button LoadAll;
         Button Analyse;
@@ -73,6 +77,7 @@ namespace DataVerifier
             PEM21_ListBox = this.FindControl<ListBox>("PEM21_ListBox");
             PEM22_ListBox = this.FindControl<ListBox>("PEM22_ListBox");
             TimestampPicker = this.FindControl<DatePicker>("TimestampPicker");
+            UploadNotification = this.FindControl<TextBlock>("UploadNotification");
             UploadDatabases = this.FindControl<Button>("UploadDatabases");
             LoadAll = this.FindControl<Button>("LoadAll");
             Analyse = this.FindControl<Button>("Analyse");
@@ -115,36 +120,66 @@ namespace DataVerifier
             };
             UploadDatabases.Click += async (sender, e) =>
             {
-                await Task.Run(() =>
+                Task t = new Task(async () =>
                 {
-                    string pickerTime = (TimestampPicker.SelectedDate ?? DateTime.Now).ToString("ddMMyyyhhmmss");
+                    string pickerTime = (TimestampPicker.SelectedDate ?? DateTime.Now).ToString("yyyyMMddhhmm");
+                    TextWriter textWriter = new StreamWriter(File.OpenWrite("ssh.log"));
                     using (SshClient ssh = new SshClient(ConfigurationManager.AppSettings["Host"], ConfigurationManager.AppSettings["Username"], ConfigurationManager.AppSettings["Password"]))
                     {
                         ssh.Connect();
-                        ssh.RunCommand($"mkdir { pickerTime }");
-                        ssh.RunCommand($"mkdir { pickerTime }/PEM\\ 20");
-                        ssh.RunCommand($"mkdir { pickerTime }/PEM\\ 21");
-                        ssh.RunCommand($"mkdir { pickerTime }/PEM\\ 22");
+
+                        void RunCommand(string command)
+                        {
+                            textWriter.WriteLine(command);
+                            SshCommand cmd = ssh.RunCommand(command);
+                            if (string.IsNullOrWhiteSpace(cmd.Error))
+                                textWriter.WriteLine(cmd.Result);
+                            else
+                                textWriter.WriteLine(cmd.Error);
+                        }
+
+                        RunCommand($"mkdir { pickerTime }");
+                        RunCommand($"mkdir -p { pickerTime }/PEM\\ 20");
+                        RunCommand($"mkdir -p { pickerTime }/PEM\\ 21");
+                        RunCommand($"mkdir -p { pickerTime }/PEM\\ 22");
                         ssh.Disconnect();
                     }
 
-                    using (ScpClient scp = new ScpClient(ConfigurationManager.AppSettings["Host"], ConfigurationManager.AppSettings["Username"], ConfigurationManager.AppSettings["Password"]))
+                    await textWriter.FlushAsync();
+
+                    using (SftpClient sftp = new SftpClient(ConfigurationManager.AppSettings["Host"], ConfigurationManager.AppSettings["Username"], ConfigurationManager.AppSettings["Password"]))
                     {
-                        scp.Connect();
-                        void UploadFile(TextBlock databasePath, string remotePath)
+                        sftp.Connect();
+
+                        void UploadFileAsync(TextBlock databasePath, string remotePath)
                         {
-                            foreach (FileStream file in databasePath.Text.Split(separator: ";".ToCharArray(), options: StringSplitOptions.RemoveEmptyEntries).Select(x => x.Trim()).Where(x => File.Exists(x)).Select(x => File.OpenRead(x)))
+                            foreach (FileInfo file in databasePath.Text.Split(separator: ";".ToCharArray(), options: StringSplitOptions.RemoveEmptyEntries).Select(x => x.Trim()).Where(x => File.Exists(x)).Select(x => new FileInfo(x)))
                             {
-                                scp.Upload(file, $"{ pickerTime }/{ remotePath }");
-                                file.Close();
+                                string remoteFile = $"{ pickerTime }/{ remotePath }/{ file.Name }";
+                                textWriter.WriteLine($"sftp { file.FullName } {remoteFile}");
+                                try
+                                {
+                                    sftp.UploadFile(file.OpenRead(), remoteFile);
+                                }
+                                catch (Exception ex)
+                                {
+                                    textWriter.WriteLine(ex.Message);
+                                }
                             }
                         }
-                        UploadFile(PEM20_Path, "PEM\\ 20");
-                        UploadFile(PEM21_Path, "PEM\\ 21");
-                        UploadFile(PEM22_Path, "PEM\\ 22");
-                        scp.Disconnect();
+                        UploadFileAsync(PEM20_Path, "PEM 20");
+                        UploadFileAsync(PEM21_Path, "PEM 21");
+                        UploadFileAsync(PEM22_Path, "PEM 22");
+                        sftp.Disconnect();
                     }
+
+                    await textWriter.FlushAsync();
+                    textWriter.Close();
                 });
+                t.Start();
+                await t;
+
+                UploadNotification.Text = "Uploaded";
             };
             LoadAll.Click += async (sender, e) =>
             {
@@ -344,6 +379,8 @@ namespace DataVerifier
                     }
                 }
             };
+
+            TimestampPicker.SelectedDate = DateTime.Now;
         }
 
         private void LoadXML()
