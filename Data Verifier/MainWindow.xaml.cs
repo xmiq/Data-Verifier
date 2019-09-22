@@ -233,14 +233,14 @@ namespace DataVerifier
                     try
                     {
                         SQLiteCommand command = connection.CreateCommand();
-                        command.CommandText = "SELECT key as \"Activity ID\", userId as \"User\", time(totalTime/1000, \"unixepoch\") AS \"Time\" FROM activity WHERE totalTime IS NOT NULL ORDER BY userId, id";
-                        Activity[] data = command.ExecuteReader().OfType<IDataRecord>().Select(x => new Activity { ActivityID = x["Activity ID"].ToString(), User = x["User"].ToString(), Time = x["Time"].ToString() }).ToArray();
+                        command.CommandText = "SELECT id, key as \"Activity ID\", userId as \"User\", time(totalTime/1000, \"unixepoch\") AS \"Time\" FROM activity WHERE totalTime IS NOT NULL ORDER BY userId, id";
+                        Activity[] data = command.ExecuteReader().OfType<IDataRecord>().Select(x => new Activity { ID = int.Parse(x["id"].ToString()), ActivityID = x["Activity ID"].ToString(), User = x["User"].ToString(), Time = x["Time"].ToString() }).ToArray();
                         IEnumerable<CombinedActivity> combined = data.FullJoin(second: Activities,
                             firstKeySelector: x => x.ActivityID,
                             secondKeySelector: x => x.Key,
-                            firstSelector: x => new CombinedActivity { ActivityID = x.ActivityID, Time = TimeSpan.Parse(x.Time), User = x.User, ProperTime = TimeSpan.FromSeconds(0) },
-                            secondSelector: x => new CombinedActivity { ActivityID = x.Key, Time = TimeSpan.FromSeconds(0), User = "-1", ProperTime = x.Value},
-                            bothSelector: (x, y) => new CombinedActivity{ ActivityID = x.ActivityID, Time = TimeSpan.Parse(x.Time), User = x.User, ProperTime = y.Value });
+                            firstSelector: x => new CombinedActivity { ID = x.ID, ActivityID = x.ActivityID, Time = TimeSpan.Parse(x.Time), User = x.User, ProperTime = TimeSpan.FromSeconds(0) },
+                            secondSelector: x => new CombinedActivity { ID = -1, ActivityID = x.Key, Time = TimeSpan.FromSeconds(0), User = "-1", ProperTime = x.Value},
+                            bothSelector: (x, y) => new CombinedActivity{ ID = x.ID, ActivityID = x.ActivityID, Time = TimeSpan.Parse(x.Time), User = x.User, ProperTime = y.Value });
 
                         #region Label
 
@@ -255,6 +255,8 @@ namespace DataVerifier
                             lbi.Content = grid;
 
                             grid.ColumnDefinitions.Add(new ColumnDefinition(12, GridUnitType.Pixel));
+                            grid.ColumnDefinitions.Add(new ColumnDefinition(30, GridUnitType.Pixel));
+                            grid.ColumnDefinitions.Add(new ColumnDefinition(12, GridUnitType.Pixel));
                             grid.ColumnDefinitions.Add(new ColumnDefinition(60, GridUnitType.Pixel));
                             grid.ColumnDefinitions.Add(new ColumnDefinition(12, GridUnitType.Pixel));
                             grid.ColumnDefinitions.Add(new ColumnDefinition(40, GridUnitType.Pixel));
@@ -270,18 +272,27 @@ namespace DataVerifier
 
                             TextBlock id = new TextBlock
                             {
-                                Text = "ActivityID"
+                                Text = "ID"
                             };
                             Grid.SetColumn(id, 1);
                             Grid.SetRow(id, 1);
 
                             grid.Children.Add(id);
 
+                            TextBlock aid = new TextBlock
+                            {
+                                Text = "Activity ID"
+                            };
+                            Grid.SetColumn(aid, 3);
+                            Grid.SetRow(aid, 1);
+
+                            grid.Children.Add(aid);
+
                             TextBlock usr = new TextBlock
                             {
                                 Text = "User"
                             };
-                            Grid.SetColumn(usr, 3);
+                            Grid.SetColumn(usr, 5);
                             Grid.SetRow(usr, 1);
 
                             grid.Children.Add(usr);
@@ -290,7 +301,7 @@ namespace DataVerifier
                             {
                                 Text = "Time"
                             };
-                            Grid.SetColumn(time, 5);
+                            Grid.SetColumn(time, 7);
                             Grid.SetRow(time, 1);
 
                             grid.Children.Add(time);
@@ -299,19 +310,18 @@ namespace DataVerifier
                             {
                                 Text = "ProperTime"
                             };
-                            Grid.SetColumn(proper, 7);
+                            Grid.SetColumn(proper, 9);
                             Grid.SetRow(proper, 1);
 
                             grid.Children.Add(proper);
 
                             lbi.IsEnabled = false;
-
                         }
 
                         #endregion
 
 
-                        foreach (var record in combined)
+                        foreach (CombinedActivity record in combined)
                         {
 
                             ListBoxItem lbi = new ListBoxItem();
@@ -323,6 +333,8 @@ namespace DataVerifier
                             lbi.Content = grid;
 
                             grid.ColumnDefinitions.Add(new ColumnDefinition(12, GridUnitType.Pixel));
+                            grid.ColumnDefinitions.Add(new ColumnDefinition(30, GridUnitType.Pixel));
+                            grid.ColumnDefinitions.Add(new ColumnDefinition(12, GridUnitType.Pixel));
                             grid.ColumnDefinitions.Add(new ColumnDefinition(60, GridUnitType.Pixel));
                             grid.ColumnDefinitions.Add(new ColumnDefinition(12, GridUnitType.Pixel));
                             grid.ColumnDefinitions.Add(new ColumnDefinition(40, GridUnitType.Pixel));
@@ -338,18 +350,27 @@ namespace DataVerifier
 
                             TextBlock id = new TextBlock
                             {
-                                Text = record.ActivityID
+                                Text = record.ID.ToString()
                             };
                             Grid.SetColumn(id, 1);
                             Grid.SetRow(id, 1);
 
                             grid.Children.Add(id);
 
+                            TextBlock aid = new TextBlock
+                            {
+                                Text = record.ActivityID
+                            };
+                            Grid.SetColumn(aid, 3);
+                            Grid.SetRow(aid, 1);
+
+                            grid.Children.Add(aid);
+
                             TextBlock usr = new TextBlock
                             {
                                 Text = record.User
                             };
-                            Grid.SetColumn(usr, 3);
+                            Grid.SetColumn(usr, 5);
                             Grid.SetRow(usr, 1);
 
                             grid.Children.Add(usr);
@@ -358,7 +379,7 @@ namespace DataVerifier
                             {
                                 Text = record.Time.ToString()
                             };
-                            Grid.SetColumn(time, 5);
+                            Grid.SetColumn(time, 7);
                             Grid.SetRow(time, 1);
 
                             grid.Children.Add(time);
@@ -367,10 +388,16 @@ namespace DataVerifier
                             {
                                 Text = record.ProperTime.ToString()
                             };
-                            Grid.SetColumn(proper, 7);
+                            Grid.SetColumn(proper, 9);
                             Grid.SetRow(proper, 1);
 
                             grid.Children.Add(proper);
+
+                            lbi.Tapped += (tapped, ev) =>
+                            {
+                                JoinCheck joinCheck = new JoinCheck(connection, record);
+                                joinCheck.ShowDialog(this);
+                            };
                         }
                     }
                     finally
