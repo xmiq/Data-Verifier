@@ -250,123 +250,123 @@ namespace DataVerifier
                 grid.RowDefinitions.Add(new RowDefinition(12, GridUnitType.Pixel));
                 grid.RowDefinitions.Add(new RowDefinition(1, GridUnitType.Auto));
                 grid.RowDefinitions.Add(new RowDefinition(12, GridUnitType.Pixel));
+                grid.RowDefinitions.Add(new RowDefinition(1, GridUnitType.Auto));
+                grid.RowDefinitions.Add(new RowDefinition(12, GridUnitType.Pixel));
+                grid.RowDefinitions.Add(new RowDefinition(1, GridUnitType.Auto));
+                grid.RowDefinitions.Add(new RowDefinition(12, GridUnitType.Pixel));
+                grid.RowDefinitions.Add(new RowDefinition(1, GridUnitType.Auto));
+                grid.RowDefinitions.Add(new RowDefinition(12, GridUnitType.Pixel));
+                grid.RowDefinitions.Add(new RowDefinition(1, GridUnitType.Auto));
+                grid.RowDefinitions.Add(new RowDefinition(12, GridUnitType.Pixel));
+                grid.RowDefinitions.Add(new RowDefinition(1, GridUnitType.Auto));
+                grid.RowDefinitions.Add(new RowDefinition(12, GridUnitType.Pixel));
 
-                TextBlock id = new TextBlock
+                int Column = 1;
+                int Row = 1;
+                int MaxColumn = 23;
+
+                void AddText(string text)
                 {
-                    Text = item.A_ID
-                };
-                Grid.SetColumn(id, 1);
-                Grid.SetRow(id, 1);
+                    TextBlock txt = new TextBlock
+                    {
+                        Text = text
+                    };
+                    Grid.SetColumn(txt, Column);
+                    Grid.SetRow(txt, Row);
 
-                grid.Children.Add(id);
+                    grid.Children.Add(txt);
 
-                TextBlock key = new TextBlock
-                {
-                    Text = item.A_Key
-                };
-                Grid.SetColumn(key, 3);
-                Grid.SetRow(key, 1);
+                    Column += 2;
 
-                grid.Children.Add(key);
+                    if (Column > MaxColumn)
+                    {
+                        Row += 2;
+                        Column = 1;
+                    }
+                }
 
-                TextBlock start = new TextBlock
-                {
-                    Text = item.StartTime
-                };
-                Grid.SetColumn(start, 5);
-                Grid.SetRow(start, 1);
-
-                grid.Children.Add(start);
-
-                TextBlock end = new TextBlock
-                {
-                    Text = item.EndTime
-                };
-                Grid.SetColumn(end, 7);
-                Grid.SetRow(end, 1);
-
-                grid.Children.Add(end);
-
-                TextBlock total = new TextBlock
-                {
-                    Text = item.TotalTime
-                };
-                Grid.SetColumn(total, 9);
-                Grid.SetRow(total, 1);
-
-                grid.Children.Add(total);
-
-                TextBlock name = new TextBlock
-                {
-                    Text = item.F_Name
-                };
-                Grid.SetColumn(name, 11);
-                Grid.SetRow(name, 1);
-
-                grid.Children.Add(name);
-
-                TextBlock mac = new TextBlock
-                {
-                    Text = item.F_MacAddress
-                };
-                Grid.SetColumn(mac, 13);
-                Grid.SetRow(mac, 1);
-
-                grid.Children.Add(mac);
-
-                TextBlock rssi = new TextBlock
-                {
-                    Text = item.F_RSSI
-                };
-                Grid.SetColumn(rssi, 15);
-                Grid.SetRow(rssi, 1);
-
-                grid.Children.Add(rssi);
-
-                TextBlock x = new TextBlock
-                {
-                    Text = item.SD_X
-                };
-                Grid.SetColumn(x, 17);
-                Grid.SetRow(x, 1);
-
-                grid.Children.Add(x);
-
-                TextBlock y = new TextBlock
-                {
-                    Text = item.SD_Y
-                };
-                Grid.SetColumn(y, 19);
-                Grid.SetRow(y, 1);
-
-                grid.Children.Add(y);
-
-                TextBlock z = new TextBlock
-                {
-                    Text = item.SD_Z
-                };
-                Grid.SetColumn(z, 21);
-                Grid.SetRow(z, 1);
-
-                grid.Children.Add(z);
-
-                TextBlock sdStart = new TextBlock
-                {
-                    Text = item.SD_StartTime
-                };
-                Grid.SetColumn(sdStart, 23);
-                Grid.SetRow(sdStart, 1);
-
-                grid.Children.Add(sdStart);
-
-                TextBlock heart = new TextBlock
-                {
-                    Text = item.ZG_HeartRate
-                };
-                Grid.SetColumn(heart, 1);
-                Grid.SetRow(heart, 3);
-
-                grid.Children.Add(heart);
+                AddText(item.A_ID);
+                AddText(item.A_Key);
+                AddText(item.StartTime);
+                AddText(item.EndTime);
+                AddText(item.TotalTime);
+                AddText(item.F_Name);
+                AddText(item.F_MacAddress);
+                AddText(item.F_RSSI);
+                AddText(item.SD_X);
+                AddText(item.SD_Y);
+                AddText(item.SD_Z);
+                AddText(item.SD_StartTime);
+                AddText(item.ZG_HeartRate);
+                AddText(item.ZG_RespirationRate);
+                AddText(item.ZG_SkinTemperature);
+                AddText(item.ZG_Posture);
+                AddText(item.ZG_Activity);
+                AddText(item.ZG_PeakAcceleration);
+                AddText(item.ZG_BreathingWaveAmplitude);
+                AddText(item.ZG_EcgAmplitude);
+                AddText(item.ZG_EcgNoise);
+                AddText(item.ZG_VerticalAxisAccelerationMin);
+                AddText(item.ZG_VerticalAxisAccelerationPeak);
+                AddText(item.ZG_LateralAxisAccelerationMin);
+                AddText(item.ZG_LateralAxisAccelerationPeak);
+                AddText(item.ZG_SagittalAxisAccelerationMin);
+                AddText(item.ZG_SagittalAxisAccelerationPeak);
+                AddText(item.ZG_Gsr);
+                AddText(item.ZG_Rog);
+                AddText(item.ZR_RToRSample0);
+                AddText(item.ZR_RToRSample1);
+                AddText(item.ZR_RToRSample2);
+                AddText(item.ZR_RToRSample3);
+                AddText(item.ZR_RToRSample4);
+                AddText(item.ZR_RToRSample5);
+                AddText(item.ZR_RToRSample6);
+                AddText(item.ZR_RToRSample7);
+                AddText(item.ZR_RToRSample8);
+                AddText(item.ZR_RToRSample9);
+                AddText(item.ZR_RToRSample10);
+                AddText(item.ZR_RToRSample11);
+                AddText(item.ZR_RToRSample12);
+                AddText(item.ZR_RToRSample13);
+                AddText(item.ZR_RToRSample14);
+                AddText(item.ZR_RToRSample15);
+                AddText(item.ZR_RToRSample16);
+                AddText(item.ZR_RToRSample17);
+                AddText(item.ZR_FinalRtoRSample);
+                AddText(item.ZS_HeartRate);
+                AddText(item.ZS_RespirationRate);
+                AddText(item.ZS_SkinTemperature);
+                AddText(item.ZS_Posture);
+                AddText(item.ZS_Activity);
+                AddText(item.ZS_PeakAcceleration);
+                AddText(item.ZS_BatteryVoltage);
+                AddText(item.ZS_BatteryLevel);
+                AddText(item.ZS_BreathingWaveAmplitude);
+                AddText(item.ZS_BreathingWaveNoise);
+                AddText(item.ZS_BreathingRateConfidence);
+                AddText(item.ZS_EcgAmplitude);
+                AddText(item.ZS_EcgNoise);
+                AddText(item.ZS_HeartRateConfidence);
+                AddText(item.ZS_HeartRateVariability);
+                AddText(item.ZS_SystemConfidence);
+                AddText(item.ZS_Gsr);
+                AddText(item.ZS_Rog);
+                AddText(item.ZS_VerticalAxisAccelerationMin);
+                AddText(item.ZS_VerticalAxisAccelerationPeak);
+                AddText(item.ZS_LateralAxisAccelerationMin);
+                AddText(item.ZS_LateralAxisAccelerationPeak);
+                AddText(item.ZS_SagittalAxisAccelerationMin);
+                AddText(item.ZS_SagittalAxisAccelerationPeak);
+                AddText(item.ZS_DeviceInternalTemp);
+                AddText(item.ZS_StatusInfo);
+                AddText(item.ZS_LinkQuality);
+                AddText(item.ZS_Rssi);
+                AddText(item.ZS_TxPower);
+                AddText(item.ZS_EstimatedCoreTemperature);
+                AddText(item.ZS_AuxiliaryChannel1);
+                AddText(item.ZS_AuxiliaryChannel2);
+                AddText(item.ZS_AuxiliaryChannel3);
+                AddText(item.ZS_Reserved);
             }
         }
     }
