@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFrameworks>netcoreapp2.2;net461</TargetFrameworks>
+    <TargetFrameworks>netcoreapp2.2;netcoreapp3.0;net461</TargetFrameworks>
     <AssemblyName>DataVerifier</AssemblyName>
     <RootNamespace>DataVerifier</RootNamespace>
   </PropertyGroup>
