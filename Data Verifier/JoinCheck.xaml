@@ -23,14 +23,23 @@
       <RowDefinition Height="*" />
       <RowDefinition Height="24" />
     </Grid.RowDefinitions>
-    
+
     <Button Grid.Row="1" Grid.Column="1" Name="FullCheck">Full Check</Button>
     <NumericUpDown Grid.Row="1" Grid.Column="4" Value="1" Name="Page" Minimum="0" />
     <TextBlock Grid.Row="1" Grid.Column="5" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="22">/</TextBlock>
     <TextBlock Grid.Row="1" Grid.Column="6" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="22" Name="Max"></TextBlock>
-    
-    <ListBox Grid.Row="3" Grid.Column="1" Grid.ColumnSpan="6" Name="Results">
-      
-    </ListBox>
+
+    <Border Grid.Row="3" Grid.Column="1" Grid.ColumnSpan="6" BorderBrush="Black" BorderThickness="1">
+      <Grid Name="ResultsGrid">
+        <Grid.RowDefinitions>
+          <RowDefinition Height="*" />
+          <RowDefinition Height="6*" />
+        </Grid.RowDefinitions>
+        <ScrollViewer VerticalScrollBarVisibility="Auto" Grid.Row="1">
+          <WrapPanel Name="Results" Orientation="Vertical">
+          </WrapPanel>
+        </ScrollViewer>
+      </Grid>
+    </Border>
   </Grid>
 </Window>

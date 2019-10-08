@@ -35,38 +35,40 @@ namespace DataVerifier
 
         #region Controls
 
-        Button PEM20_Button;
-        Button PEM21_Button;
-        Button PEM22_Button;
+        private Button PEM20_Button;
+        private Button PEM21_Button;
+        private Button PEM22_Button;
 
-        TextBlock PEM20_Path;
-        TextBlock PEM21_Path;
-        TextBlock PEM22_Path;
+        private TextBlock PEM20_Path;
+        private TextBlock PEM21_Path;
+        private TextBlock PEM22_Path;
 
-        ListBox PEM20_ListBox;
-        ListBox PEM21_ListBox;
-        ListBox PEM22_ListBox;
+        private ListBox PEM20_ListBox;
+        private ListBox PEM21_ListBox;
+        private ListBox PEM22_ListBox;
 
-        DatePicker TimestampPicker;
+        private DatePicker TimestampPicker;
 
-        TextBlock UploadNotification;
+        private TextBlock UploadNotification;
 
-        Button UploadDatabases;
-        Button LoadAll;
-        Button Analyse;
+        private Button UploadDatabases;
+        private Button LoadAll;
+        private Button Analyse;
 
-        #endregion
+        #endregion Controls
 
         #region Variables
 
         private readonly Dictionary<string, TimeSpan> Activities = new Dictionary<string, TimeSpan>();
 
-        #endregion
+        #endregion Variables
 
         private void InitializeComponent()
         {
             AvaloniaXamlLoader.Load(this);
+
             #region Designer
+
             PEM20_Button = this.FindControl<Button>("PEM20_Button");
             PEM21_Button = this.FindControl<Button>("PEM21_Button");
             PEM22_Button = this.FindControl<Button>("PEM22_Button");
@@ -81,7 +83,9 @@ namespace DataVerifier
             UploadDatabases = this.FindControl<Button>("UploadDatabases");
             LoadAll = this.FindControl<Button>("LoadAll");
             Analyse = this.FindControl<Button>("Analyse");
-            #endregion
+
+            #endregion Designer
+
             PEM20_Button.Click += async (sender, e) =>
             {
                 OpenFileDialog openFileDialog = new OpenFileDialog
@@ -91,7 +95,7 @@ namespace DataVerifier
                 string[] files = await openFileDialog.ShowAsync(this);
                 if (files.Any())
                 {
-                    PEM20_Path.Text = string.Join("; ", files);
+                    PEM20_Path.Text = string.Join("; ", files).Replace("%20", " ");
                 }
             };
             PEM21_Button.Click += async (sender, e) =>
@@ -103,7 +107,7 @@ namespace DataVerifier
                 string[] files = await openFileDialog.ShowAsync(this);
                 if (files.Any())
                 {
-                    PEM21_Path.Text = string.Join("; ", files);
+                    PEM21_Path.Text = string.Join("; ", files).Replace("%20", " ");
                 }
             };
             PEM22_Button.Click += async (sender, e) =>
@@ -115,7 +119,7 @@ namespace DataVerifier
                 string[] files = await openFileDialog.ShowAsync(this);
                 if (files.Any())
                 {
-                    PEM22_Path.Text = string.Join("; ", files);
+                    PEM22_Path.Text = string.Join("; ", files).Replace("%20", " ");
                 }
             };
             UploadDatabases.Click += async (sender, e) =>
@@ -190,7 +194,7 @@ namespace DataVerifier
                 string directory = await openFolderDialog.ShowAsync(this);
                 if (Directory.Exists(directory))
                 {
-                    var files = Directory.EnumerateDirectories(directory).Select(x => new { PEM_No = Regex.Match(x, "PEM\\s\\d{2}").Value, Files = Directory.EnumerateFiles(x).Where(y => !y.Contains("_database") && !y.Contains("database-shm") && !y.Contains("database-wal"))  });
+                    var files = Directory.EnumerateDirectories(directory).Select(x => new { PEM_No = Regex.Match(x, "PEM\\s\\d{2}").Value, Files = Directory.EnumerateFiles(x).Where(y => !y.Contains("_database") && !y.Contains("database-shm") && !y.Contains("database-wal")) });
                     foreach (var folder in files)
                     {
                         if (folder.Files.Any())
@@ -200,9 +204,11 @@ namespace DataVerifier
                                 case "PEM 20":
                                     PEM20_Path.Text = string.Join("; ", folder.Files);
                                     break;
+
                                 case "PEM 21":
                                     PEM21_Path.Text = string.Join("; ", folder.Files);
                                     break;
+
                                 case "PEM 22":
                                     PEM22_Path.Text = string.Join("; ", folder.Files);
                                     break;
@@ -239,13 +245,12 @@ namespace DataVerifier
                             firstKeySelector: x => x.ActivityID,
                             secondKeySelector: x => x.Key,
                             firstSelector: x => new CombinedActivity { ID = x.ID, ActivityID = x.ActivityID, Time = TimeSpan.Parse(x.Time), User = x.User, ProperTime = TimeSpan.FromSeconds(0) },
-                            secondSelector: x => new CombinedActivity { ID = -1, ActivityID = x.Key, Time = TimeSpan.FromSeconds(0), User = "-1", ProperTime = x.Value},
-                            bothSelector: (x, y) => new CombinedActivity{ ID = x.ID, ActivityID = x.ActivityID, Time = TimeSpan.Parse(x.Time), User = x.User, ProperTime = y.Value });
+                            secondSelector: x => new CombinedActivity { ID = -1, ActivityID = x.Key, Time = TimeSpan.FromSeconds(0), User = "-1", ProperTime = x.Value },
+                            bothSelector: (x, y) => new CombinedActivity { ID = x.ID, ActivityID = x.ActivityID, Time = TimeSpan.Parse(x.Time), User = x.User, ProperTime = y.Value });
 
                         #region Label
 
                         {
-
                             ListBoxItem lbi = new ListBoxItem();
 
                             ListBoxItems.Add(lbi);
@@ -318,12 +323,10 @@ namespace DataVerifier
                             lbi.IsEnabled = false;
                         }
 
-                        #endregion
-
+                        #endregion Label
 
                         foreach (CombinedActivity record in combined)
                         {
-
                             ListBoxItem lbi = new ListBoxItem();
 
                             ListBoxItems.Add(lbi);
@@ -396,7 +399,7 @@ namespace DataVerifier
                             lbi.Tapped += (tapped, ev) =>
                             {
                                 JoinCheck joinCheck = new JoinCheck(connection, record);
-                                joinCheck.ShowDialog(this);
+                                joinCheck.Show();
                             };
                         }
                     }
@@ -418,7 +421,7 @@ namespace DataVerifier
                 XElement root = XElement.Parse(text);
                 XElement activities = root.Element("Activities");
 
-                foreach(XElement activity in activities.Elements("Activity"))
+                foreach (XElement activity in activities.Elements("Activity"))
                 {
                     string val = activity.Element("Number").Value;
                     TimeSpan time = DateTime.Parse(activity.Element("Time").Value).TimeOfDay;
@@ -442,12 +445,14 @@ namespace DataVerifier
                 activity.Add(new XElement("Time", "00:01:00"));
 
                 #region Save XML file
+
                 FileStream settingsFile = File.OpenWrite("Settings.xml");
                 XmlWriter xmlWriter = XmlWriter.Create(settingsFile, new XmlWriterSettings() { Indent = true });
                 root.WriteTo(xmlWriter);
                 xmlWriter.Flush();
                 xmlWriter.Close();
-                #endregion
+
+                #endregion Save XML file
             }
         }
     }

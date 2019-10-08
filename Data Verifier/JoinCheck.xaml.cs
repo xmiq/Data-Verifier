@@ -10,6 +10,7 @@ using System.Data.SQLite;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Threading;
+using Avalonia.Media;
 
 namespace DataVerifier
 {
@@ -25,10 +26,10 @@ namespace DataVerifier
 #endif
         }
 
-        NumericUpDown Page;
-        TextBlock Max;
-        Task Load;
-        CancellationTokenSource cts;
+        private NumericUpDown Page;
+        private TextBlock Max;
+        private Task Load;
+        private CancellationTokenSource cts;
 
         private void InitializeComponent()
         {
@@ -47,7 +48,6 @@ namespace DataVerifier
                     FC.Content = "Stop Full Check";
                     Load = Task.Run(LoadFullCheck, cts.Token);
 
-
                     Page.Value = 0;
                     Page.GetType()?.GetField("EventHandlers")?.SetValue(Page, null);
                     Page.ValueChanged += (sender2, e2) => ChangeList();
@@ -65,11 +65,10 @@ namespace DataVerifier
             Max = this.FindControl<TextBlock>("Max");
         }
 
-        SQLiteConnection _connection;
-        CombinedActivity _record;
+        private SQLiteConnection _connection;
+        private CombinedActivity _record;
 
-
-        ArrayList FullCheckData = ArrayList.Synchronized(new ArrayList());
+        private ArrayList FullCheckData = ArrayList.Synchronized(new ArrayList());
 
         private void LoadFullCheck()
         {
@@ -79,7 +78,7 @@ namespace DataVerifier
                 SQLiteCommand command = _connection.CreateCommand();
 
                 command.CommandText = @"
-                    SELECT a.id, a.key, datetime(a.startTime/1000, 'unixepoch') AS startTimeFormatted, datetime(a.endTime/1000, 'unixepoch') AS endTimeFormatted, time(a.totalTime/1000, 'unixepoch') AS totalTimeFormatted, f.name, f.macAddress, f.rssi, sd.x, sd.y, sd.z,  datetime(sd.timestamp/1000, 'unixepoch') AS sdStartTimeFormatted, 
+                    SELECT a.id, a.key, datetime(a.startTime/1000, 'unixepoch') AS startTimeFormatted, datetime(a.endTime/1000, 'unixepoch') AS endTimeFormatted, time(a.totalTime/1000, 'unixepoch') AS totalTimeFormatted, f.name, f.macAddress, f.rssi, sd.x, sd.y, sd.z,  datetime(sd.timestamp/1000, 'unixepoch') AS sdStartTimeFormatted,
                            zg.heartRate, zg.respirationRate, zg.skinTemperature, zg.posture, zg.activity, zg.peakAcceleration, zg.breathingWaveAmplitude, zg.ecgAmplitude, zg.ecgNoise, zg.verticalAxisAccelerationMin, zg.verticalAxisAccelerationPeak, zg.lateralAxisAccelerationMin, zg.lateralAxisAccelerationPeak, zg.sagittalAxisAccelerationMin, zg.sagittalAxisAccelerationPeak, zg.gsr, zg.rog,
 	                       zr.rToRSample0, zr.rToRSample1, zr.rToRSample2, zr.rToRSample3, zr.rToRSample4, zr.rToRSample5, zr.rToRSample6, zr.rToRSample7, zr.rToRSample8, zr.rToRSample9, zr.rToRSample10, zr.rToRSample11, zr.rToRSample12, zr.rToRSample13, zr.rToRSample14, zr.rToRSample15, zr.rToRSample16, zr.rToRSample17, zr.finalRtoRSample,
 	                       zs.heartRate, zs.respirationRate, zs.skinTemperature, zs.posture, zs.activity, zs.peakAcceleration, zs.batteryVoltage, zs.batteryLevel, zs.breathingWaveAmplitude, zs.breathingWaveNoise, zs.breathingRateConfidence, zs.ecgAmplitude, zs.ecgNoise, zs.heartRateConfidence, zs.heartRateVariability, zs.systemConfidence,
@@ -196,11 +195,13 @@ namespace DataVerifier
 
         private void ChangeList()
         {
-            IList resultList = this.FindControl<ListBox>("Results").Items as IList;
+            Controls resultList = this.FindControl<WrapPanel>("Results").Children;
             resultList.Clear();
             GC.Collect();
             IEnumerable<FullCheck> ConvertedList = ((ArrayList)FullCheckData.Clone()).OfType<FullCheck>();
             Page.Maximum = (ConvertedList.Count() / 20);
+            if (Page.Maximum == 0)
+                Page.Maximum++;
             Max.Text = Page.Maximum.ToString();
 
             FullCheck header = new FullCheck();
@@ -209,18 +210,29 @@ namespace DataVerifier
                 prop.SetValue(header, prop.Name);
             }
 
-            foreach (FullCheck item in new[] { header }.Concat(ConvertedList.Skip((Convert.ToInt32(Page.Value) - 1) * 20).Take(20)))
-            {
-                ListBoxItem lbi = new ListBoxItem();
+            AddRow(this.FindControl<Grid>("ResultsGrid").Children, header);
 
-                resultList.Add(lbi);
+            foreach (FullCheck item in ConvertedList.Skip((Convert.ToInt32(Page.Value) - 1) * 20).Take(20))
+            {
+                AddRow(resultList, item);
+            }
+
+            void AddRow(Controls list, FullCheck item)
+            {
+                Border border = new Border
+                {
+                    BorderBrush = Brushes.Black,
+                    BorderThickness = new Thickness(1)
+                };
+
+                list.Add(border);
 
                 Grid grid = new Grid();
 
-                lbi.Content = grid;
+                border.Child = grid;
 
                 grid.ColumnDefinitions.Add(new ColumnDefinition(12, GridUnitType.Pixel));
-                grid.ColumnDefinitions.Add(new ColumnDefinition(30, GridUnitType.Pixel)); //1
+                grid.ColumnDefinitions.Add(new ColumnDefinition(120, GridUnitType.Pixel)); //1
                 grid.ColumnDefinitions.Add(new ColumnDefinition(12, GridUnitType.Pixel));
                 grid.ColumnDefinitions.Add(new ColumnDefinition(30, GridUnitType.Pixel)); //3
                 grid.ColumnDefinitions.Add(new ColumnDefinition(12, GridUnitType.Pixel));
@@ -285,88 +297,10 @@ namespace DataVerifier
                     }
                 }
 
-                AddText(item.A_ID);
-                AddText(item.A_Key);
-                AddText(item.StartTime);
-                AddText(item.EndTime);
-                AddText(item.TotalTime);
-                AddText(item.F_Name);
-                AddText(item.F_MacAddress);
-                AddText(item.F_RSSI);
-                AddText(item.SD_X);
-                AddText(item.SD_Y);
-                AddText(item.SD_Z);
-                AddText(item.SD_StartTime);
-                AddText(item.ZG_HeartRate);
-                AddText(item.ZG_RespirationRate);
-                AddText(item.ZG_SkinTemperature);
-                AddText(item.ZG_Posture);
-                AddText(item.ZG_Activity);
-                AddText(item.ZG_PeakAcceleration);
-                AddText(item.ZG_BreathingWaveAmplitude);
-                AddText(item.ZG_EcgAmplitude);
-                AddText(item.ZG_EcgNoise);
-                AddText(item.ZG_VerticalAxisAccelerationMin);
-                AddText(item.ZG_VerticalAxisAccelerationPeak);
-                AddText(item.ZG_LateralAxisAccelerationMin);
-                AddText(item.ZG_LateralAxisAccelerationPeak);
-                AddText(item.ZG_SagittalAxisAccelerationMin);
-                AddText(item.ZG_SagittalAxisAccelerationPeak);
-                AddText(item.ZG_Gsr);
-                AddText(item.ZG_Rog);
-                AddText(item.ZR_RToRSample0);
-                AddText(item.ZR_RToRSample1);
-                AddText(item.ZR_RToRSample2);
-                AddText(item.ZR_RToRSample3);
-                AddText(item.ZR_RToRSample4);
-                AddText(item.ZR_RToRSample5);
-                AddText(item.ZR_RToRSample6);
-                AddText(item.ZR_RToRSample7);
-                AddText(item.ZR_RToRSample8);
-                AddText(item.ZR_RToRSample9);
-                AddText(item.ZR_RToRSample10);
-                AddText(item.ZR_RToRSample11);
-                AddText(item.ZR_RToRSample12);
-                AddText(item.ZR_RToRSample13);
-                AddText(item.ZR_RToRSample14);
-                AddText(item.ZR_RToRSample15);
-                AddText(item.ZR_RToRSample16);
-                AddText(item.ZR_RToRSample17);
-                AddText(item.ZR_FinalRtoRSample);
-                AddText(item.ZS_HeartRate);
-                AddText(item.ZS_RespirationRate);
-                AddText(item.ZS_SkinTemperature);
-                AddText(item.ZS_Posture);
-                AddText(item.ZS_Activity);
-                AddText(item.ZS_PeakAcceleration);
-                AddText(item.ZS_BatteryVoltage);
-                AddText(item.ZS_BatteryLevel);
-                AddText(item.ZS_BreathingWaveAmplitude);
-                AddText(item.ZS_BreathingWaveNoise);
-                AddText(item.ZS_BreathingRateConfidence);
-                AddText(item.ZS_EcgAmplitude);
-                AddText(item.ZS_EcgNoise);
-                AddText(item.ZS_HeartRateConfidence);
-                AddText(item.ZS_HeartRateVariability);
-                AddText(item.ZS_SystemConfidence);
-                AddText(item.ZS_Gsr);
-                AddText(item.ZS_Rog);
-                AddText(item.ZS_VerticalAxisAccelerationMin);
-                AddText(item.ZS_VerticalAxisAccelerationPeak);
-                AddText(item.ZS_LateralAxisAccelerationMin);
-                AddText(item.ZS_LateralAxisAccelerationPeak);
-                AddText(item.ZS_SagittalAxisAccelerationMin);
-                AddText(item.ZS_SagittalAxisAccelerationPeak);
-                AddText(item.ZS_DeviceInternalTemp);
-                AddText(item.ZS_StatusInfo);
-                AddText(item.ZS_LinkQuality);
-                AddText(item.ZS_Rssi);
-                AddText(item.ZS_TxPower);
-                AddText(item.ZS_EstimatedCoreTemperature);
-                AddText(item.ZS_AuxiliaryChannel1);
-                AddText(item.ZS_AuxiliaryChannel2);
-                AddText(item.ZS_AuxiliaryChannel3);
-                AddText(item.ZS_Reserved);
+                foreach (System.Reflection.PropertyInfo prop in item.GetType().GetProperties())
+                {
+                    AddText(prop.GetValue(item).ToString());
+                }
             }
         }
     }
