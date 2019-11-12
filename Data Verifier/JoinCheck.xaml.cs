@@ -11,6 +11,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Threading;
 using Avalonia.Media;
+using Avalonia.Threading;
+using System.IO;
 
 namespace DataVerifier
 {
@@ -61,6 +63,24 @@ namespace DataVerifier
                     FC.Content = "Full Check";
                 }
             };
+            this.FindControl<Button>("Export").Click += async (sender, e) =>
+            {
+                FullCheck header = new FullCheck();
+                foreach (System.Reflection.PropertyInfo prop in header.GetType().GetProperties())
+                {
+                    prop.SetValue(header, prop.Name);
+                }
+
+                IEnumerable<string> exportList = ((ArrayList)FullCheckData.Clone()).OfType<FullCheck>().Prepend(header).Select(x => string.Join(',', x.GetType().GetProperties().Select(y => y.GetValue(x).ToString()))).Distinct();
+
+                SaveFileDialog saveFileDialog = new SaveFileDialog();
+                saveFileDialog.DefaultExtension = "csv";
+                saveFileDialog.Filters.Add(new FileDialogFilter() { Name = "CSV", Extensions = new List<string>() { "csv" } });
+                string path = await saveFileDialog.ShowAsync(this);
+
+                if (!string.IsNullOrWhiteSpace(path))
+                    await File.AppendAllLinesAsync(path, exportList);
+            };
             Page = this.FindControl<NumericUpDown>("Page");
             Max = this.FindControl<TextBlock>("Max");
         }
@@ -107,84 +127,91 @@ namespace DataVerifier
                         StartTime = record["startTimeFormatted"].ToString(),
                         EndTime = record["endTimeFormatted"].ToString(),
                         TotalTime = record["totalTimeFormatted"].ToString(),
-                        F_Name = record["name"].ToString(),
-                        F_MacAddress = record["macAddress"].ToString(),
-                        F_RSSI = record["rssi"].ToString(),
+                        //F_Name = record["name"].ToString(),
+                        //F_MacAddress = record["macAddress"].ToString(),
+                        //F_RSSI = record["rssi"].ToString(),
                         SD_X = record["x"].ToString(),
                         SD_Y = record["y"].ToString(),
                         SD_Z = record["z"].ToString(),
                         SD_StartTime = record["sdStartTimeFormatted"].ToString(),
                         ZG_HeartRate = record["heartRate"].ToString(),
-                        ZG_RespirationRate = record["respirationRate"].ToString(),
-                        ZG_SkinTemperature = record["skinTemperature"].ToString(),
+                        //ZG_RespirationRate = record["respirationRate"].ToString(),
+                        //ZG_SkinTemperature = record["skinTemperature"].ToString(),
                         ZG_Posture = record["posture"].ToString(),
-                        ZG_Activity = record["activity"].ToString(),
-                        ZG_PeakAcceleration = record["peakAcceleration"].ToString(),
-                        ZG_BreathingWaveAmplitude = record["breathingWaveAmplitude"].ToString(),
-                        ZG_EcgAmplitude = record["ecgAmplitude"].ToString(),
-                        ZG_EcgNoise = record["ecgNoise"].ToString(),
+                        //ZG_Activity = record["activity"].ToString(),
+                        //ZG_PeakAcceleration = record["peakAcceleration"].ToString(),
+                        //ZG_BreathingWaveAmplitude = record["breathingWaveAmplitude"].ToString(),
+                        //ZG_EcgAmplitude = record["ecgAmplitude"].ToString(),
+                        //ZG_EcgNoise = record["ecgNoise"].ToString(),
                         ZG_VerticalAxisAccelerationMin = record["verticalAxisAccelerationMin"].ToString(),
                         ZG_VerticalAxisAccelerationPeak = record["verticalAxisAccelerationPeak"].ToString(),
                         ZG_LateralAxisAccelerationMin = record["lateralAxisAccelerationMin"].ToString(),
                         ZG_LateralAxisAccelerationPeak = record["lateralAxisAccelerationPeak"].ToString(),
                         ZG_SagittalAxisAccelerationMin = record["sagittalAxisAccelerationMin"].ToString(),
                         ZG_SagittalAxisAccelerationPeak = record["sagittalAxisAccelerationPeak"].ToString(),
-                        ZG_Gsr = record["gsr"].ToString(),
-                        ZG_Rog = record["rog"].ToString(),
-                        ZR_RToRSample0 = record["rToRSample0"].ToString(),
-                        ZR_RToRSample1 = record["rToRSample1"].ToString(),
-                        ZR_RToRSample2 = record["rToRSample2"].ToString(),
-                        ZR_RToRSample3 = record["rToRSample3"].ToString(),
-                        ZR_RToRSample4 = record["rToRSample4"].ToString(),
-                        ZR_RToRSample5 = record["rToRSample5"].ToString(),
-                        ZR_RToRSample6 = record["rToRSample6"].ToString(),
-                        ZR_RToRSample7 = record["rToRSample7"].ToString(),
-                        ZR_RToRSample8 = record["rToRSample8"].ToString(),
-                        ZR_RToRSample9 = record["rToRSample9"].ToString(),
-                        ZR_RToRSample10 = record["rToRSample10"].ToString(),
-                        ZR_RToRSample11 = record["rToRSample11"].ToString(),
-                        ZR_RToRSample12 = record["rToRSample12"].ToString(),
-                        ZR_RToRSample13 = record["rToRSample13"].ToString(),
-                        ZR_RToRSample14 = record["rToRSample14"].ToString(),
-                        ZR_RToRSample15 = record["rToRSample15"].ToString(),
-                        ZR_RToRSample16 = record["rToRSample16"].ToString(),
-                        ZR_RToRSample17 = record["rToRSample17"].ToString(),
-                        ZR_FinalRtoRSample = record["finalRtoRSample"].ToString(),
+                        //ZG_Gsr = record["gsr"].ToString(),
+                        //ZG_Rog = record["rog"].ToString(),
+                        //ZR_RToRSample0 = record["rToRSample0"].ToString(),
+                        //ZR_RToRSample1 = record["rToRSample1"].ToString(),
+                        //ZR_RToRSample2 = record["rToRSample2"].ToString(),
+                        //ZR_RToRSample3 = record["rToRSample3"].ToString(),
+                        //ZR_RToRSample4 = record["rToRSample4"].ToString(),
+                        //ZR_RToRSample5 = record["rToRSample5"].ToString(),
+                        //ZR_RToRSample6 = record["rToRSample6"].ToString(),
+                        //ZR_RToRSample7 = record["rToRSample7"].ToString(),
+                        //ZR_RToRSample8 = record["rToRSample8"].ToString(),
+                        //ZR_RToRSample9 = record["rToRSample9"].ToString(),
+                        //ZR_RToRSample10 = record["rToRSample10"].ToString(),
+                        //ZR_RToRSample11 = record["rToRSample11"].ToString(),
+                        //ZR_RToRSample12 = record["rToRSample12"].ToString(),
+                        //ZR_RToRSample13 = record["rToRSample13"].ToString(),
+                        //ZR_RToRSample14 = record["rToRSample14"].ToString(),
+                        //ZR_RToRSample15 = record["rToRSample15"].ToString(),
+                        //ZR_RToRSample16 = record["rToRSample16"].ToString(),
+                        //ZR_RToRSample17 = record["rToRSample17"].ToString(),
+                        //ZR_FinalRtoRSample = record["finalRtoRSample"].ToString(),
                         ZS_HeartRate = record["heartRate"].ToString(),
-                        ZS_RespirationRate = record["respirationRate"].ToString(),
-                        ZS_SkinTemperature = record["skinTemperature"].ToString(),
+                        //ZS_RespirationRate = record["respirationRate"].ToString(),
+                        //ZS_SkinTemperature = record["skinTemperature"].ToString(),
                         ZS_Posture = record["posture"].ToString(),
-                        ZS_Activity = record["activity"].ToString(),
-                        ZS_PeakAcceleration = record["peakAcceleration"].ToString(),
-                        ZS_BatteryVoltage = record["batteryVoltage"].ToString(),
-                        ZS_BatteryLevel = record["batteryLevel"].ToString(),
-                        ZS_BreathingWaveAmplitude = record["breathingWaveAmplitude"].ToString(),
-                        ZS_BreathingWaveNoise = record["breathingWaveNoise"].ToString(),
-                        ZS_BreathingRateConfidence = record["breathingRateConfidence"].ToString(),
-                        ZS_EcgAmplitude = record["ecgAmplitude"].ToString(),
-                        ZS_EcgNoise = record["ecgNoise"].ToString(),
-                        ZS_HeartRateConfidence = record["heartRateConfidence"].ToString(),
-                        ZS_HeartRateVariability = record["heartRateVariability"].ToString(),
-                        ZS_SystemConfidence = record["systemConfidence"].ToString(),
-                        ZS_Gsr = record["gsr"].ToString(),
-                        ZS_Rog = record["rog"].ToString(),
+                        //ZS_Activity = record["activity"].ToString(),
+                        //ZS_PeakAcceleration = record["peakAcceleration"].ToString(),
+                        //ZS_BatteryVoltage = record["batteryVoltage"].ToString(),
+                        //ZS_BatteryLevel = record["batteryLevel"].ToString(),
+                        //ZS_BreathingWaveAmplitude = record["breathingWaveAmplitude"].ToString(),
+                        //ZS_BreathingWaveNoise = record["breathingWaveNoise"].ToString(),
+                        //ZS_BreathingRateConfidence = record["breathingRateConfidence"].ToString(),
+                        //ZS_EcgAmplitude = record["ecgAmplitude"].ToString(),
+                        //ZS_EcgNoise = record["ecgNoise"].ToString(),
+                        //ZS_HeartRateConfidence = record["heartRateConfidence"].ToString(),
+                        //ZS_HeartRateVariability = record["heartRateVariability"].ToString(),
+                        //ZS_SystemConfidence = record["systemConfidence"].ToString(),
+                        //ZS_Gsr = record["gsr"].ToString(),
+                        //ZS_Rog = record["rog"].ToString(),
                         ZS_VerticalAxisAccelerationMin = record["verticalAxisAccelerationMin"].ToString(),
                         ZS_VerticalAxisAccelerationPeak = record["verticalAxisAccelerationPeak"].ToString(),
                         ZS_LateralAxisAccelerationMin = record["lateralAxisAccelerationMin"].ToString(),
                         ZS_LateralAxisAccelerationPeak = record["lateralAxisAccelerationPeak"].ToString(),
                         ZS_SagittalAxisAccelerationMin = record["sagittalAxisAccelerationMin"].ToString(),
                         ZS_SagittalAxisAccelerationPeak = record["sagittalAxisAccelerationPeak"].ToString(),
-                        ZS_DeviceInternalTemp = record["deviceInternalTemp"].ToString(),
-                        ZS_StatusInfo = record["statusInfo"].ToString(),
-                        ZS_LinkQuality = record["linkQuality"].ToString(),
-                        ZS_Rssi = record["rssi"].ToString(),
-                        ZS_TxPower = record["txPower"].ToString(),
-                        ZS_EstimatedCoreTemperature = record["estimatedCoreTemperature"].ToString(),
-                        ZS_AuxiliaryChannel1 = record["auxiliaryChannel1"].ToString(),
-                        ZS_AuxiliaryChannel2 = record["auxiliaryChannel2"].ToString(),
-                        ZS_AuxiliaryChannel3 = record["auxiliaryChannel3"].ToString(),
-                        ZS_Reserved = record["reserved"].ToString()
+                        //ZS_DeviceInternalTemp = record["deviceInternalTemp"].ToString(),
+                        //ZS_StatusInfo = record["statusInfo"].ToString(),
+                        //ZS_LinkQuality = record["linkQuality"].ToString(),
+                        //ZS_Rssi = record["rssi"].ToString(),
+                        //ZS_TxPower = record["txPower"].ToString(),
+                        //ZS_EstimatedCoreTemperature = record["estimatedCoreTemperature"].ToString(),
+                        //ZS_AuxiliaryChannel1 = record["auxiliaryChannel1"].ToString(),
+                        //ZS_AuxiliaryChannel2 = record["auxiliaryChannel2"].ToString(),
+                        //ZS_AuxiliaryChannel3 = record["auxiliaryChannel3"].ToString(),
+                        //ZS_Reserved = record["reserved"].ToString()
                     });
+
+                    if (FullCheckData.Count % 20 == 0)
+                        Dispatcher.UIThread.InvokeAsync(() =>
+                        {
+                            Page.Maximum = FullCheckData.Count / 20;
+                            InvalidateVisual();
+                        }, DispatcherPriority.MaxValue);
                 }
             }
             finally
@@ -198,7 +225,7 @@ namespace DataVerifier
             Controls resultList = this.FindControl<WrapPanel>("Results").Children;
             resultList.Clear();
             GC.Collect();
-            IEnumerable<FullCheck> ConvertedList = ((ArrayList)FullCheckData.Clone()).OfType<FullCheck>();
+            IEnumerable<FullCheck> ConvertedList = ((ArrayList)FullCheckData.Clone()).OfType<FullCheck>().Distinct();
             Page.Maximum = (ConvertedList.Count() / 20);
             if (Page.Maximum == 0)
                 Page.Maximum++;
@@ -234,7 +261,7 @@ namespace DataVerifier
                 grid.ColumnDefinitions.Add(new ColumnDefinition(12, GridUnitType.Pixel));
                 grid.ColumnDefinitions.Add(new ColumnDefinition(120, GridUnitType.Pixel)); //1
                 grid.ColumnDefinitions.Add(new ColumnDefinition(12, GridUnitType.Pixel));
-                grid.ColumnDefinitions.Add(new ColumnDefinition(30, GridUnitType.Pixel)); //3
+                grid.ColumnDefinitions.Add(new ColumnDefinition(120, GridUnitType.Pixel)); //3
                 grid.ColumnDefinitions.Add(new ColumnDefinition(12, GridUnitType.Pixel));
                 grid.ColumnDefinitions.Add(new ColumnDefinition(120, GridUnitType.Pixel)); //5
                 grid.ColumnDefinitions.Add(new ColumnDefinition(12, GridUnitType.Pixel));
@@ -246,7 +273,7 @@ namespace DataVerifier
                 grid.ColumnDefinitions.Add(new ColumnDefinition(12, GridUnitType.Pixel));
                 grid.ColumnDefinitions.Add(new ColumnDefinition(120, GridUnitType.Pixel)); //13
                 grid.ColumnDefinitions.Add(new ColumnDefinition(12, GridUnitType.Pixel));
-                grid.ColumnDefinitions.Add(new ColumnDefinition(30, GridUnitType.Pixel)); //15
+                grid.ColumnDefinitions.Add(new ColumnDefinition(120, GridUnitType.Pixel)); //15
                 grid.ColumnDefinitions.Add(new ColumnDefinition(12, GridUnitType.Pixel));
                 grid.ColumnDefinitions.Add(new ColumnDefinition(120, GridUnitType.Pixel)); //17
                 grid.ColumnDefinitions.Add(new ColumnDefinition(12, GridUnitType.Pixel));

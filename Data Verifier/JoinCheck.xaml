@@ -25,6 +25,7 @@
     </Grid.RowDefinitions>
 
     <Button Grid.Row="1" Grid.Column="1" Name="FullCheck">Full Check</Button>
+    <Button Grid.Row="1" Grid.Column="3" Name="Export" Width="100" Margin="0 0 350 0">Export</Button>
     <NumericUpDown Grid.Row="1" Grid.Column="4" Value="1" Name="Page" Minimum="0" />
     <TextBlock Grid.Row="1" Grid.Column="5" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="22">/</TextBlock>
     <TextBlock Grid.Row="1" Grid.Column="6" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="22" Name="Max"></TextBlock>
